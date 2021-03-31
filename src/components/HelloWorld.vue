@@ -1,32 +1,12 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <button @click="gameOfLife(board)">按鈕</button>
+    {{board}}
+    <div style="display: flex;flex-direction: column;">
+      <div  style="display: flex" v-for="(item, index) in board" :key="index">
+        <div class="basic" :class="[x === 1 ? 'back-color' : '']" v-for="(x, itemIndex) in item" :key="itemIndex"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -35,6 +15,72 @@ export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  data: () => {
+    return {
+      board: [[0,1,0],[0,0,1],[1,1,1],[0,0,0]],
+    }
+  },
+  mounted () {
+    this.gameOfLife(this.board);
+  },
+  methods: {
+    gameOfLife(board) {
+      const result = new Array();
+      for(let i=0; i < board.length; i++) {
+        const newItem = new Array();
+        for(let y=0; y < board[i].length; y++) {
+            let n = 0;
+          
+            if (i-1 >= 0) {
+                if (y-1 >= 0) {
+                    n = this.getAliveNeighbors(board[i-1][y-1], n);
+                }
+                if (y+1 <  board[i].length) {
+                    n = this.getAliveNeighbors(board[i-1][y+1], n);
+                }
+                n = this.getAliveNeighbors(board[i-1][y], n);
+            }
+            if (i+1 < board.length) {
+                if (y-1 >= 0) {
+                    n = this.getAliveNeighbors(board[i+1][y-1], n);
+                }
+                if (y+1 <  board[i].length) {
+                    n = this.getAliveNeighbors(board[i+1][y+1], n);
+                }
+                n = this.getAliveNeighbors(board[i+1][y], n);
+            }
+            if (y-1 >= 0) {
+                n = this.getAliveNeighbors(board[i][y-1], n);
+            }
+            if (y+1 <  board[i].length) {
+                n = this.getAliveNeighbors(board[i][y+1], n);
+            }
+            if (board[i][y] === 1) {
+                if (n == 2 || n == 3) {
+                    newItem.push(1);
+                } else {
+                    newItem.push(0);
+                }
+            } else {
+                if (n == 3) {
+                    newItem.push(1);
+                } else {
+                    newItem.push(0);
+                }
+            }
+        }
+        result.push(newItem);
+      }
+      for(let i = 0; i<result.length; i++) {
+          for(let y = 0; y< result[i].length; y++) {
+              board[i][y] = result[i][y];
+          }
+      }
+    },
+    getAliveNeighbors(item, n) {
+      return item == 1 ? n + 1 : n;
+    }
   }
 }
 </script>
@@ -54,5 +100,13 @@ li {
 }
 a {
   color: #42b983;
+}
+.basic {
+  border: 1px solid black; 
+  width: 15px; 
+  height: 15px;
+}
+.back-color {
+  background: black;
 }
 </style>
